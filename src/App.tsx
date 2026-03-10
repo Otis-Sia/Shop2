@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
-import { ShoppingCart, User as UserIcon, LogOut, Menu, X, Search, Heart, Package, LayoutDashboard } from "lucide-react";
+import { ShoppingCart, User as UserIcon, LogOut, Menu, X, Search, Heart, Package, LayoutDashboard, Moon, Sun } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Product, User, CartItem } from "./types";
 
@@ -24,6 +24,15 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("shophub_darkmode");
+    return saved ? saved === "true" : false;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
+    localStorage.setItem("shophub_darkmode", String(darkMode));
+  }, [darkMode]);
 
   useEffect(() => {
     localStorage.setItem("shophub_user", JSON.stringify(user));
@@ -76,13 +85,15 @@ export default function App() {
 
   return (
     <Router>
-      <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-white dark:bg-secondary-900 text-secondary-900 dark:text-secondary-100 transition-colors duration-300">
         <Header 
           user={user} 
           cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)} 
           logout={logout}
           isMenuOpen={isMenuOpen}
           setIsMenuOpen={setIsMenuOpen}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
         />
         
         <main className="flex-grow">
@@ -106,7 +117,7 @@ export default function App() {
   );
 }
 
-function Header({ user, cartCount, logout, isMenuOpen, setIsMenuOpen }: any) {
+function Header({ user, cartCount, logout, isMenuOpen, setIsMenuOpen, darkMode, setDarkMode }: any) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -115,7 +126,7 @@ function Header({ user, cartCount, logout, isMenuOpen, setIsMenuOpen }: any) {
   }, [location, setIsMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-secondary-100">
+    <header className="sticky top-0 z-50 bg-white/80 dark:bg-secondary-900/80 backdrop-blur-md border-b border-secondary-100 dark:border-secondary-700">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link to="/" className="text-2xl font-extrabold text-primary-500 tracking-tighter flex items-center gap-2">
           <Package className="w-8 h-8" />
@@ -135,6 +146,14 @@ function Header({ user, cartCount, logout, isMenuOpen, setIsMenuOpen }: any) {
         </nav>
 
         <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-2 hover:bg-secondary-50 dark:hover:bg-secondary-700 rounded-full transition-colors"
+            title={darkMode ? "Light mode" : "Dark mode"}
+          >
+            {darkMode ? <Sun className="w-6 h-6 text-yellow-400" /> : <Moon className="w-6 h-6" />}
+          </button>
+
           <button className="p-2 hover:bg-secondary-50 rounded-full transition-colors hidden sm:block">
             <Search className="w-6 h-6" />
           </button>
@@ -142,7 +161,7 @@ function Header({ user, cartCount, logout, isMenuOpen, setIsMenuOpen }: any) {
           <Link to="/cart" className="p-2 hover:bg-secondary-50 rounded-full transition-colors relative">
             <ShoppingCart className="w-6 h-6" />
             {cartCount > 0 && (
-              <span className="absolute top-0 right-0 bg-primary-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+              <span className="absolute top-0 right-0 bg-primary-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white dark:border-secondary-900">
                 {cartCount}
               </span>
             )}
@@ -184,7 +203,7 @@ function Header({ user, cartCount, logout, isMenuOpen, setIsMenuOpen }: any) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="md:hidden absolute top-full left-0 w-full bg-white border-b border-secondary-100 shadow-xl p-4 flex flex-col gap-4"
+            className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-secondary-800 border-b border-secondary-100 dark:border-secondary-700 shadow-xl p-4 flex flex-col gap-4"
           >
             <Link to="/" className="p-3 font-medium hover:bg-primary-50 hover:text-primary-500 rounded-xl">Home</Link>
             <Link to="/products" className="p-3 font-medium hover:bg-primary-50 hover:text-primary-500 rounded-xl">Shop</Link>
